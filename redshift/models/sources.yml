@@ -1,0 +1,63 @@
+version: 2
+
+sources:
+  - name: report_acs
+    schema: report_acs
+    tables:
+        - name: fact_acs_2023_census_block_demographics
+          identifier: fact_acs_2023_census_block_demographics
+        - name: fact_acs_2023_census_block_group_demographics
+          identifier: fact_acs_2023_census_block_group_demographics
+        - name: fact_acs_2016_census_block_demographics
+          identifier: fact_acs_2016_census_block_demographics
+  - name: report_bdc
+    schema: report_bdc
+    tables: 
+      - name: fact_bdc_location_reporting_current
+        identifier: fact_bdc_location_reporting_current
+      - name: nbm_broadband_current_residential_census_block_level
+        identifier: nbm_broadband_current_residential_census_block_level
+      - name: nbm_broadband_current_residential_census_block_hocofinal_level
+        identifier: nbm_broadband_current_residential_census_block_hocofinal_level
+  - name: report_market
+    schema: report_market
+    tables:
+      - name: market_crosswalk_latest
+        identifier: market_crosswalk_latest
+  - name: source_household
+    schema: source_household
+    tables:
+      - name: infousa_2025
+        identifier: infousa_2025
+  - name: source_market
+    schema: source_market
+    tables:
+      - name: road_miles_by_census_block_group_2024
+        identifier: road_miles_by_census_block_group_2024
+      - name: road_miles_by_census_block_group_2023
+        identifier: road_miles_by_census_block_group_2023
+      - name: census_block_2010_to_census_block_2020_proportional
+        identifier: census_block_2010_to_census_block_2020_proportional
+  - name: source_bdc
+    schema: source_bdc
+    tables:
+      - name: fact_bdc_location_reporting_hocofinal_2023_06
+        identifier: fact_bdc_location_reporting_hocofinal_2023_06
+      - name: fact_bdc_location_reporting_hocofinal
+        identifier: fact_bdc_location_reporting_hocofinal
+      - name: fact_bdc_location_reporting_hocofinal_2024_06
+        identifier: fact_bdc_location_reporting_hocofinal_2024_06
+      - name: fact_bdc_location_reporting_hocofinal_2023_12
+        identifier: fact_bdc_location_reporting_hocofinal_2023_12
+      - name: fact_bdc_location_reporting_hocofinal_2022_12
+        identifier: fact_bdc_location_reporting_hocofinal_2022_12
+      - name: fact_bdc_location_reporting_hocofinal_2022_06
+        identifier: fact_bdc_location_reporting_hocofinal_2022_06
+  - name: report_business
+    schema: report_business
+    tables:
+      - name: fact_businesses_2025
+        identifier: fact_businesses_2025
+
+
+  

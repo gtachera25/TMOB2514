@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: tmob2514
+    schema: tmob2514
+    tables:
+        - name: source_i3_central_illinois_cable_construction_20251006
+          identifier: source_i3_central_illinois_cable_construction_20251006
+        - name: source_i3_central_illinois_cable_installed_20251006
+          identifier: source_i3_central_illinois_cable_installed_20251006
+        - name: source_i3_northern_illinois_cable_construction_20251006
+          identifier: source_i3_northern_illinois_cable_construction_20251006
+        - name: source_i3_northern_illinois_cable_installed_20251006
+          identifier: source_i3_northern_illinois_cable_installed_20251006
+        - name: source_i3_northern_missouri_cable_construction_20251006
+          identifier: source_i3_northern_missouri_cable_construction_20251006
+        - name: source_intrepid_cable_construction_20251007
+          identifier: source_intrepid_cable_construction_20251007
+        - name: source_i3_warren_cable_20251006
+          identifier: source_i3_warren_cable_20251006
+        - name: source_i3_barrington_cable_20251006
+          identifier: source_i3_barrington_cable_20251006
+        - name: source_i3_bristol_cable_20251006
+          identifier: source_i3_bristol_cable_20251006
+        - name : source_i3_northern_missouri_cable_installed_20251006
+          identifier: source_i3_northern_missouri_cable_installed_20251006
+        - name: source_i3_southern_missouri_cable_20251006
+          identifier: source_i3_southern_missouri_cable_20251006
+  - name: tiger
+    schema: tiger_2024
+    tables:
+        - name: tabblock
+          identifier: tabblock
+        - name: place
+          identifier: place
+        - name: cousub
+          identifier: cousub
+        - name: county
+          identifier: county
+        - name: state
+          identifier: state
+        - name: bg
+          identifier: bg
+        - name: tract
+          identifier: tract
+  - name: infousa_households_2025_data
+    schema: infousa_households_2025_data
+    tables:
+        - name: locations
+          identifier: locations
+  - name: public
+    schema: public
+    tables:
+        - name: road_miles_by_cbg_2024
+          identifier: road_miles_by_cbg_2024
+        - name: zip_areas_esri_2023
+          identifier: zip_areas_esri_2023
