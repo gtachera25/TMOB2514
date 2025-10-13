@@ -1,6 +1,11 @@
 version: 2
 
 sources:
+  - name: project_tmob2514
+    schema: project_tmob2514
+    tables:
+      - name: report_cbs_in_footprint
+        identifier: report_cbs_in_footprint
   - name: report_acs
     schema: report_acs
     tables:
@@ -58,6 +63,43 @@ sources:
     tables:
       - name: fact_businesses_2025
         identifier: fact_businesses_2025
+  - name: project_tmob2513
+    schema: project_tmob2513
+    tables:
+      - name: tag_cb_to_polygons
+        identifier: tag_cb_to_polygons
+      - name: expansion_market_cbs_from_tiger
+        identifier: expansion_market_cbs_from_tiger
+      - name: report_cbs_in_footprint
+        identifier: report_cbs_in_footprint
+      - name: report_cbs_in_footprint_by_zip
+        identifier: report_cbs_in_footprint_by_zip
+      - name: source_acs_tract_language_spoken_at_home_2023
+        identifier: source_acs_tract_language_spoken_at_home_2023
+      - name: gns_cb_level_penetration_expectations_08192025_v1
+        identifier: gns_cb_level_penetration_expectations_08192025_v1
+      - name: gns_census_block_pen_model_0_60_month_08202025
+        identifier: gns_census_block_pen_model_0_60_month_08202025
+      - name: expansion_markets_geoms_union
+        identifier: expansion_markets_geoms_union
+      - name: report_cbs_in_expansion
+        identifier: report_cbs_in_expansion
+      - name: source_projected_pen_expansion_20250902
+        identifier: source_projected_pen_expansion_20250902
+      - name: base_precisely_locations_in_fpt_cbs
+        identifier: base_precisely_locations_in_fpt_cbs
+      - name: fiber_miles_by_provider_morphology
+        identifier: fiber_miles_by_provider_morphology
+      - name: source_model_terminal_for_expansion_states_gns_0909
+        identifier: source_model_terminal_for_expansion_states_gns_0909
+      - name: expansion_market_phase2_mapping
+        identifier: expansion_market_phase2_mapping
+      - name: tiger_2024_cousub_extract
+        identifier: tiger_2024_cousub_extract
+      - name: precisely_full_state_data_20250922
+        identifier: precisely_full_state_data_20250922
+      - name: report_cbs_in_phase_2
+        identifier: report_cbs_in_phase_2
 
 
   
