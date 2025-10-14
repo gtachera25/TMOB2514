@@ -1,10 +1,19 @@
 {{
     config(
         materialized='table',
-        post_hook="CREATE INDEX IF NOT EXISTS idx_{{ this.name }}_geom ON {{ this }} USING GIST (geom_buffered)"
+        post_hook=[
+            "alter table {{ this }} owner to {{ this.schema }}",
+            "create index on {{ this }} using gist(geom_buffered)"
+        ]
     )
 }}
 
 SELECT
-    ST_Buffer(geom_dissolved::geography, 200, 'endcap=square')::geometry AS geom_buffered
+    ST_Transform(
+        ST_Buffer(
+            ST_Transform(geom, 3857), -- Transform to Web Mercator (meters)
+            61                        -- 200 feet = 61 meters
+        ), 
+        4326                         -- Transform back to WGS84
+    ) AS geom_buffered
 FROM {{ ref('intrepid_union_geom') }}

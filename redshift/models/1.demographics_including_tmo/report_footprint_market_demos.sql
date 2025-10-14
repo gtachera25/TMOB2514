@@ -399,9 +399,9 @@ precisely_predicted_pen as (
         sum(months_since_ofs_36 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m,
         sum(months_since_ofs_60 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m
     from base_cbs cb
-    join {{source('project_tmob2513','source_projected_pen_expansion_20250902')}} pen
+    join {{source('project_tmob2514','i3_intrepid_census_block_pen_model_0_60_month_10142025')}} pen
         on cb.census_block_code_2020 = pen.cb_id
-    where pen.market_name != ('Full Footprint') and curve_method = 'normal'
+    where curve_method = 'normal'
     group by 1
     
 ),
@@ -413,27 +413,28 @@ precisely_predicted_pen_uplift as (
         sum(months_since_ofs_36 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m_w_uplift,
         sum(months_since_ofs_60 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m_w_uplift
     from base_cbs cb
-    join {{source('project_tmob2513','source_projected_pen_expansion_20250902')}} pen_2
+    join {{source('project_tmob2514','i3_intrepid_census_block_pen_model_0_60_month_10142025')}} pen_2
         on cb.census_block_code_2020 = pen_2.cb_id
-    where pen_2.market_name != ('Full Footprint') and curve_method = 'uplift_v2'
+    where curve_method = 'uplift_v2'
     group by 1
 ),
 precisely_rollup as (
     select
         cb.market,
         prc.unit_buckets,
-        sum(cb.pct_in_footprint * prc.location_count) as precisely_passings
+        sum(cb.pct_in_footprint * prc.address_count) as precisely_passings
     from base_cbs cb
-    left join {{source('project_tmob2513','precisely_full_state_data_20250922')}} prc
-        on cb.census_block_code_2020 = prc.cb_id
+    left join {{source('project_tmob2514','i3_intrepid_cb_address_view_residential')}} prc
+        on cb.census_block_code_2020 = prc.census_block_code_2020
     group by 1,2
 ),
 precisely_counts as (
     select
         market,
         sum(case when unit_buckets = '1 Unit' then precisely_passings else 0 end) as precisely_units_1,
-        sum(case when unit_buckets = '2-6 Units' then precisely_passings else 0 end) as precisely_units_2_6,
-        sum(case when unit_buckets = '7+ Units' then precisely_passings else 0 end) as precisely_units_7_plus
+        sum(case when unit_buckets = '2-20 Units' then precisely_passings else 0 end) as precisely_units_2_20,
+        sum(case when unit_buckets = '20-50 Units' then precisely_passings else 0 end) as precisely_units_20_50,
+        sum(case when unit_buckets = '50+ Units' then precisely_passings else 0 end) as precisely_units_50_plus
     from precisely_rollup prc
     group by 1
 )
@@ -509,15 +510,16 @@ select
     -- base.ilec, --Ccomment out for state rollup
     -- Penetration Data
     'N/A' as precisely_passings,
-    'N/A' as predicted_penetration_12m,
-    'N/A' as predicted_penetration_36m,
-    'N/A' as predicted_penetration_60m,
-    'N/A' as predicted_penetration_12m_w_uplift,
-    'N/A' as predicted_penetration_36m_w_uplift,
-    'N/A' as predicted_penetration_60m_w_uplift,
-    'N/A' as precisely_units_1,
-    'N/A' as precisely_units_2_6,
-    'N/A' as precisely_units_7_plus
+    pen.predicted_penetration_12m,
+    pen.predicted_penetration_36m,
+    pen.predicted_penetration_60m,
+    pen_2.predicted_penetration_12m_w_uplift,
+    pen_2.predicted_penetration_36m_w_uplift,
+    pen_2.predicted_penetration_60m_w_uplift,
+    prc.precisely_units_1,
+    prc.precisely_units_2_20,
+    prc.precisely_units_20_50,
+    prc.precisely_units_50_plus
 
 from market_summary base
 -- Demos

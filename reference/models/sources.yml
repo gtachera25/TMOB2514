@@ -28,6 +28,13 @@ sources:
           identifier: source_i3_southern_missouri_cable_20251006
         - name: i3_intrepid_base_location_counts_in_fpt_cb_residential
           identifier: i3_intrepid_base_location_counts_in_fpt_cb_residential
+        - name: source_intrepid_cherry_creek_co_10132025
+          identifier: source_intrepid_cherry_creek_co_10132025
+        - name: source_intrepid_greenwood_co_10132025
+          identifier: source_intrepid_greenwood_co_10132025
+        - name: source_intrepid_ifn_markets_10132025
+          identifier: source_intrepid_ifn_markets_10132025
+        - name: source_intrepid_thornton_co_10132025
   - name: tiger
     schema: tiger_2024
     tables:

@@ -6,6 +6,24 @@ sources:
     tables:
       - name: report_cbs_in_footprint
         identifier: report_cbs_in_footprint
+      - name: i3_penetration_cbs_normal_10132025
+        identifier: i3_penetration_cbs_normal_10132025
+      - name: i3_penetration_cbs_excluding_tmo_as_comp_normal_10132025
+        identifier: i3_penetration_cbs_excluding_tmo_as_comp_normal_10132025
+      - name: i3_penetration_cbs_uplift_v2_10132025
+        identifier: i3_penetration_cbs_uplift_v2_10132025
+      - name: base_precisely_locations_in_fpt_cbs
+        identifier: base_precisely_locations_in_fpt_cbs
+      - name: report_cbs_in_intrepid_polygon_footprint
+        identifier: report_cbs_in_intrepid_polygon_footprint
+      - name: i3_intrepid_census_block_pen_model_0_60_month_10142025
+        identifier: i3_intrepid_census_block_pen_model_0_60_month_10142025
+      - name: i3_intrepid_census_block_pen_model_w_tmo_0_60_month_10142025
+        identifier: i3_intrepid_census_block_pen_model_w_tmo_0_60_month_10142025
+      - name: i3_intrepid_full_state_counts
+        identifier: i3_intrepid_full_state_counts
+      - name: i3_intrepid_cb_address_view_residential
+        identifier: i3_intrepid_cb_address_view_residential
   - name: report_acs
     schema: report_acs
     tables:
