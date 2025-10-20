@@ -7,26 +7,28 @@
         ]
     )
 }}
---runtime: 0.40s, 148787 rows
+--runtime: 0.40s, 
 with filtered_output as (
     select 
         ogc_fid as id,
         id as cable_or_fiber_id,
-        v_project as market,
+        market,
         case
-            when v_project ilike '%co%' then 'Colorado'
-            when v_project ilike '%mn%' then 'Minnesota'
+            when market ilike '%Colorado%' then 'Colorado'
+            when market ilike '%Minnesota%' then 'Minnesota'
+            when market = 'Greenwood Village' then 'Colorado'
+            when market = 'Cherry Creek' then 'Colorado'
             else 'Other'
         end as region,
         'intrepid' as owner,
-        placement_ as status,
+        'Constructed' as status,
         case
-            when folders ='strand_constructed' then 'fiber'
-            when folders ='conduit_constructed' then 'conduit'
+            when folders ='strand_constructed_full' then 'fiber'
+            when folders ='conduit_constructed_full' then 'conduit'
             else 'other'
         end as category,
         null as cable_or_fiber_length,
         geom
-    from {{source('tmob2514', 'source_intrepid_cable_construction_20251007')}}
+    from {{ref('base_intrepid_fiber_vac')}}
 )
 select distinct * from filtered_output

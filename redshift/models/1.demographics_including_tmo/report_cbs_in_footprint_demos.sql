@@ -86,12 +86,13 @@ acs_metrics as (
             + sum(acs.total_housing_units_units_in_structure_1_attached * pct_in_footprint))
             as units_1,
         (sum(total_housing_units_units_in_structure_2 * pct_in_footprint)
-            + sum(total_housing_units_units_in_structure_3_or_4 * pct_in_footprint)
-            + sum(total_housing_units_units_in_structure_5_to_9 * pct_in_footprint)
-            + sum(total_housing_units_units_in_structure_10_to_19 * pct_in_footprint))
-            as units_2_20,
-        sum(total_housing_units_units_in_structure_20_to_49 * pct_in_footprint)
-            as units_20_50,
+            + sum(total_housing_units_units_in_structure_3_or_4 * pct_in_footprint))
+            as units_2_4,
+        sum(total_housing_units_units_in_structure_5_to_9 * pct_in_footprint)
+            as units_5_9,
+        (sum(total_housing_units_units_in_structure_10_to_19 * pct_in_footprint)
+            + sum(total_housing_units_units_in_structure_20_to_49 * pct_in_footprint))
+            as units_10_50,
         sum(total_housing_units_units_in_structure_50_or_more * pct_in_footprint)
             as units_50_plus,
         sum(total_housing_units_units_in_structure_mobile_home * pct_in_footprint)
@@ -435,10 +436,32 @@ precisely_counts as (
     select
         market,
         sum(case when unit_buckets = '1 Unit' then precisely_passings else 0 end) as precisely_units_1,
-        sum(case when unit_buckets = '2-20 Units' then precisely_passings else 0 end) as precisely_units_2_20,
-        sum(case when unit_buckets = '20-50 Units' then precisely_passings else 0 end) as precisely_units_20_50,
-        sum(case when unit_buckets = '50+ Units' then precisely_passings else 0 end) as precisely_units_50_plus
+        sum(case when unit_buckets = '2-6 Units' then precisely_passings else 0 end) as precisely_units_2_6,
+        sum(case when unit_buckets = '7-19 Units' then precisely_passings else 0 end) as precisely_units_7_19,
+        sum(case when unit_buckets = '20+ Units' then precisely_passings else 0 end) as precisely_units_20_plus
     from precisely_rollup prc
+    group by 1
+),
+
+precisely_band_rollup as (
+    select
+        cb.market,
+        prc2.unit_buckets,
+        prc2.band_label,
+        sum(cb.pct_in_footprint * prc2.address_count) as precisely_passings
+    from base_cbs cb
+    left join {{source('project_tmob2514','i3_intrepid_cb_address_view_residential')}} prc2
+        on cb.census_block_code_2020 = prc2.census_block_code_2020
+    group by 1, 2, 3
+),
+precisely_band_counts as(
+    select
+        market,
+        sum(case when unit_buckets = '1 Unit' and band_label in( '01. <100ft', '02. 100ft-200ft', '03. 200ft-300ft', '04. 300ft-400ft', '05. 400ft-500ft') then precisely_passings else 0 end) as precisely_units_1_0_500ft,
+        sum(case when unit_buckets = '2-6 Units' and band_label in( '01. <100ft', '02. 100ft-200ft', '03. 200ft-300ft', '04. 300ft-400ft', '05. 400ft-500ft') then precisely_passings else 0 end) as precisely_units_2_6_0_500ft,
+        sum(case when unit_buckets = '7-19 Units' and band_label in( '01. <100ft', '02. 100ft-200ft', '03. 200ft-300ft', '04. 300ft-400ft', '05. 400ft-500ft') then precisely_passings else 0 end) as precisely_units_7_19_0_500ft,
+        sum(case when unit_buckets = '20+ Units' and band_label in( '01. <100ft', '02. 100ft-200ft', '03. 200ft-300ft', '04. 300ft-400ft', '05. 400ft-500ft') then precisely_passings else  0 end) as precisely_units_20_plus_0_500ft
+    from precisely_band_rollup prc2
     group by 1
 )
 
@@ -486,8 +509,9 @@ select
     rmm.dense_urban_road_mile_density,
     -- SFUs/MDUs
     acs.units_1,
-    acs.units_2_20,
-    acs.units_20_50,
+    acs.units_2_4,
+    acs.units_5_9,
+    acs.units_10_50,
     acs.units_50_plus,
     acs.units_mobile_home,
     acs.units_other_boat_rv_van,
@@ -533,9 +557,13 @@ select
     pen_2.predicted_penetration_36m_w_uplift,
     pen_2.predicted_penetration_60m_w_uplift,
     prc.precisely_units_1,
-    prc.precisely_units_2_20,
-    prc.precisely_units_20_50,
-    prc.precisely_units_50_plus
+    prc.precisely_units_2_6,
+    prc.precisely_units_7_19,
+    prc.precisely_units_20_plus,
+    pbc.precisely_units_1_0_500ft,
+    pbc.precisely_units_2_6_0_500ft,
+    pbc.precisely_units_7_19_0_500ft,
+    pbc.precisely_units_20_plus_0_500ft
 
 from market_summary base
 -- Demos
@@ -556,3 +584,4 @@ left join bdc_market_provider_pcts_cable cable using(market)
 left join precisely_predicted_pen pen using(market)
 left join precisely_predicted_pen_uplift pen_2 using(market)
 left join precisely_counts prc using(market)
+left join precisely_band_counts pbc using(market)

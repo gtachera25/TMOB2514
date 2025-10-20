@@ -7,7 +7,7 @@
         ]
     )
 }}
---runtime = 0.92s, 97665 rows
+--runtime = 0.92s, 137831 rows
 with consolidated_markets as(
     select * from {{ ref('base_i3_illinois_consolidated') }}
     union all

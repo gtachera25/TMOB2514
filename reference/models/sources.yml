@@ -35,6 +35,9 @@ sources:
         - name: source_intrepid_ifn_markets_10132025
           identifier: source_intrepid_ifn_markets_10132025
         - name: source_intrepid_thornton_co_10132025
+          identifier: source_intrepid_thornton_co_10132025
+        - name: source_intrepid_network_vac_10162025
+          identifier: source_intrepid_network_vac_10162025
   - name: tiger
     schema: tiger_2024
     tables:

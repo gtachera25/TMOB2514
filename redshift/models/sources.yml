@@ -1,6 +1,11 @@
 version: 2
 
 sources:
+  - name: project_tmob2402
+    schema: project_tmob2402
+    tables:
+      - name: base_bdc_resi_comm_combined_cb_hocofinal_level_locations_rpt
+        identifier: base_bdc_resi_comm_combined_cb_hocofinal_level_locations_rpt
   - name: project_tmob2514
     schema: project_tmob2514
     tables:
