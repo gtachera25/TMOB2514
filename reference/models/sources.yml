@@ -38,6 +38,8 @@ sources:
           identifier: source_intrepid_thornton_co_10132025
         - name: source_intrepid_network_vac_10162025
           identifier: source_intrepid_network_vac_10162025
+        - name: source_intrepid_polygon_expansion_in_place_10212025
+          identifier: source_intrepid_polygon_expansion_in_place_10212025
   - name: tiger
     schema: tiger_2024
     tables:
@@ -67,3 +69,13 @@ sources:
           identifier: road_miles_by_cbg_2024
         - name: zip_areas_esri_2023
           identifier: zip_areas_esri_2023
+  - name: infousa_businesses_2025
+    schema: infousa_businesses_2025
+    tables:
+        - name: businesses
+          identifier: businesses
+  - name: geology
+    schema: geology
+    tables:
+      - name: usa_bedrock_depth_polygons_90m_20200723
+        identifier: usa_bedrock_depth_polygons_90m_20200723

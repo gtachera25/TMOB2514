@@ -29,6 +29,14 @@ sources:
         identifier: i3_intrepid_full_state_counts
       - name: i3_intrepid_cb_address_view_residential
         identifier: i3_intrepid_cb_address_view_residential
+      - name: base_cbs
+        identifier: base_cbs
+      - name: i3_intrepid_ami_counties
+        identifier: i3_intrepid_ami_counties
+      - name: report_intrepid_cbs_in_expansion
+        identifier: report_intrepid_cbs_in_expansion
+      - name: fiber_miles_by_provider_morphology
+        identifier: fiber_miles_by_provider_morphology
   - name: report_acs
     schema: report_acs
     tables:

@@ -1,7 +1,9 @@
 {{ 
     config(
-        materialized='table'
-    ) 
+        materialized='table',
+        dist='market',
+        sort=['market']
+    )
 }}
 
 -- Time: 253 seconds
@@ -10,9 +12,9 @@
 with market_definition as (
     select
         fpt.census_block_code_2020,
-        fpt.provider as market,
+        fpt.census_block_code_2020 as market,
         1 as pct_in_footprint -- Switch to 1 for National Level
-    from {{ ref('report_market_cbs') }} fpt
+    from {{ ref('report_predicted_cbs_in_expansion_ami_tagged') }} fpt
     left join {{ source('report_market','market_crosswalk_latest') }} mkt
         on fpt.census_block_code_2020 = mkt.census_block_code_2020
 ),
@@ -57,6 +59,7 @@ market_summary as (
         sum(total_passings * pct_in_footprint) as total_passings_in_footprint
     from base_cbs
     group by 1
+
 ),
 -- Morphology
 morphology as (
@@ -329,7 +332,7 @@ bdc_market_provider as (
         sum(bdc_to_passings * pct_in_footprint) as numerator
     from bdc_by_provider bdc
     where resi_tech_code in ('40', '50')
-        and resi_down_speed >= 900
+        and resi_down_speed >= 100
             and resi_up_speed >= 20
             and hocofinal not in ('WH i3B Bidco LLC/WH i3B Topco, LLC', 'Stratus Networks, Inc.', 'BIF IV Intrepid HoldCo, LLC')
     group by 1,2,3
@@ -370,7 +373,7 @@ bdc_high_speed_counts_per_location as (
         bdc_to_passings,
         COUNT(DISTINCT case
             WHEN resi_tech_code IN ('40','50') 
-                AND resi_down_speed >= 900
+                AND resi_down_speed >= 100
                 AND resi_up_speed >= 20
                 AND hocofinal not in ('WH i3B Bidco LLC/WH i3B Topco, LLC', 'Stratus Networks, Inc.', 'BIF IV Intrepid HoldCo, LLC')
             THEN hocofinal END) as num_hs_providers
@@ -395,13 +398,12 @@ precisely_predicted_pen as (
     select
         cb.market,
         -- sum(unique_pbkeys) as precisely_passings,
-        sum(months_since_ofs_12 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_12m,
-        sum(months_since_ofs_36 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m,
-        sum(months_since_ofs_60 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m
+        sum(predicted_penetration_12m * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_12m,
+        sum(predicted_penetration_36m * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m,
+        sum(predicted_penetration_60m * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m
     from base_cbs cb
-    join {{source('project_tmob2514','i3_intrepid_census_block_pen_model_0_60_month_10142025')}} pen
+    join {{source('project_tmob2514','i3_penetration_cbs_normal_10132025')}} pen
         on cb.census_block_code_2020 = pen.cb_id
-    where curve_method = 'normal'
     group by 1
     
 ),
@@ -409,13 +411,12 @@ precisely_predicted_pen_uplift as (
     select
         cb.market,
         -- sum(unique_pbkeys) as precisely_passings,
-        sum(months_since_ofs_12 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_12m_w_uplift,
-        sum(months_since_ofs_36 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m_w_uplift,
-        sum(months_since_ofs_60 * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m_w_uplift
+        sum(predicted_penetration_12m_uplift * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_12m_w_uplift,
+        sum(predicted_penetration_36m_uplift * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_36m_w_uplift,
+        sum(predicted_penetration_60m_uplift * pct_in_footprint * total_passings) / nullif(sum(pct_in_footprint * total_passings), 0) as predicted_penetration_60m_w_uplift
     from base_cbs cb
-    join {{source('project_tmob2514','i3_intrepid_census_block_pen_model_0_60_month_10142025')}} pen_2
+    join {{ref('i3_penetration_cbs_uplift')}} pen_2
         on cb.census_block_code_2020 = pen_2.cb_id
-    where curve_method = 'uplift_v2'
     group by 1
 ),
 precisely_rollup as (
@@ -460,11 +461,20 @@ precisely_band_counts as(
     from precisely_band_rollup prc2
     group by 1
 )
+
 -- Final Joins
 select
     ------------ Market Designation(s) ----------------
-    base.market, 
-    SPLIT_PART(base.market, ' || ', 1) as provider,
+    base.market,
+    fpt.designation,
+    fpt.ami_tag,
+    mkt.ilec,
+    mkt.census_county_subdivision_name as csd_name,
+    fpt.county_name as county,
+    mkt.cbsa_name as metro_name,
+    dm.dma_name,
+    mkt.state,
+    mkt.cbg_morphology,
     morph.pct_rural,
     morph.pct_suburban,
     morph.pct_urban,
@@ -489,7 +499,7 @@ select
     rmm.urban_road_mile_density,
     rmm.dense_urban_road_mile_density,
     -- SFUs/MDUs
-   acs.units_1,
+    acs.units_1,
     acs.units_2_4,
     acs.units_5_19,
     acs.units_20_plus,
@@ -536,17 +546,20 @@ select
     pen_2.predicted_penetration_12m_w_uplift,
     pen_2.predicted_penetration_36m_w_uplift,
     pen_2.predicted_penetration_60m_w_uplift,
-    prc.precisely_units_1,
-    prc.precisely_units_2_4,
-    prc.precisely_units_5_19,
-    prc.precisely_units_20_plus,
-    pbc.precisely_units_1_0_500ft,
-    pbc.precisely_units_2_4_0_500ft,
-    pbc.precisely_units_5_19_0_500ft,
-    pbc.precisely_units_20_plus_0_500ft
+    'N/A' as precisely_units_1,
+    'N/A' as precisely_units_2_4,
+    'N/A' as precisely_units_5_19,
+    'N/A' as precisely_units_20_plus,
+    'N/A' as precisely_units_1_0_500ft,
+    'N/A' as precisely_units_2_4_0_500ft,
+    'N/A' as precisely_units_5_19_0_500ft,
+    'N/A' as precisely_units_20_plus_0_500ft
 
 from market_summary base
 -- Demos
+left join {{ref('report_predicted_cbs_in_expansion_ami_tagged')}} fpt on base.market = fpt.census_block_code_2020
+left join {{source('report_market','market_crosswalk_latest')}} mkt on base.market = mkt.census_block_code_2020
+left join {{ ref('base_cb_top_dma') }} dm on base.market = dm.census_block_code_2020
 left join businesses_by_market biz using(market)
 left join morphology morph using(market)
 left join acs_metrics acs using(market)

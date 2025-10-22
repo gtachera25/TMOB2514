@@ -20,7 +20,22 @@ id,
 category as infra_type,
 status as tag,
 case 
-    when owner = 'intrepid' then market
+    when market = 'Colorado; BroomfieldCO_boundary' then 'broomfield,co'
+    when market = 'Colorado; PuebloCO_boundary' then 'pueblo,co'
+    when market = 'Colorado; NorthglennCO_boundary' then 'northglenn,co'
+    when market = 'Minnesota; EdenPrairieMN_boundary' then 'edenprairie,mn'
+    when market = 'Colorado; LouisvilleLafayetteCO_boundary' then 'louisville lafayette,co'
+    when market = 'Minnesota; BloomingtonMN_boundary' then 'bloomington,mn'
+    when market = 'Minnesota; StCloudMN_boundary' then 'stcloud,mn'
+    when market = 'Cherry Creek' then 'cherrycreek,co'
+    when market = 'Minnesota; WoodburyMN_boundary' then 'woodbury,mn'
+    when market = 'Minnesota; MinnetonkaMN_boundary' then 'minnetonka,mn'
+    when market = 'Colorado; SuperiorCO_boundary' then 'superior,co'
+    when market = 'Thornton, CO' then 'thornton,co'
+    when market = 'Greenwood Village' then 'greenwood village,co'
+    when market = 'Colorado; WestminsterExpansionCO_boundary' then 'westminster,co'
+    when market = 'Colorado; WestminsterCO_boundary' then 'westminster,co'
+    when market = 'Colorado; LittletonCO_boundary' then 'littleton,co'
     when region = 'Rhode Island' then market
     else region 
 end as market_vac,

@@ -10,7 +10,7 @@
 with market_definition as (
     select
         fpt.census_block_code_2020,
-        fpt.provider as market,
+        fpt.state || ' || ' || fpt.provider as market,
         1 as pct_in_footprint -- Switch to 1 for National Level
     from {{ ref('report_market_cbs') }} fpt
     left join {{ source('report_market','market_crosswalk_latest') }} mkt
@@ -261,6 +261,84 @@ road_mile_density_final_morphology as(
     from road_mile_density_market_morphology
     group by 1
 ),
+fiber_miles_by_market_morphology as (
+    select
+        state || ' || ' || provider as market,
+        'Rural' as cbg_morphology,
+        sum(rural_fiber_miles) as total_fiber_miles
+    from {{ source('project_tmob2513','fiber_miles_by_provider_morphology') }}
+    group by 1
+
+    union all
+    select
+        state || ' || ' || provider,
+        'Suburban' as cbg_morphology,
+        sum(suburban_fiber_miles)
+    from {{ source('project_tmob2513','fiber_miles_by_provider_morphology') }}
+    group by 1
+
+    union all
+    select
+        state || ' || ' || provider,
+        'Urban' as cbg_morphology,
+        sum(urban_fiber_miles)
+    from {{ source('project_tmob2513','fiber_miles_by_provider_morphology') }}
+    group by 1
+
+    union all
+    select
+        state || ' || ' || provider,
+        'Dense Urban' as cbg_morphology,
+        sum(dense_urban_fiber_miles)
+    from {{ source('project_tmob2513','fiber_miles_by_provider_morphology') }}
+    group by 1
+),
+-- Calculate road miles by market and morphology
+road_miles_by_morphology as (
+    select
+        cb.market,
+        mkt.cbg_morphology,
+        sum(implied_road_miles * pct_in_footprint) as road_miles
+    from base_cbs cb
+    left join road_mile_density_cb rm
+        on cb.census_block_code_2020 = rm.census_block_code_2020
+    left join {{source('report_market','market_crosswalk_latest')}} mkt
+        on cb.census_block_code_2020 = mkt.census_block_code_2020
+    group by 1,2
+),
+fiber_road_ratio_by_morphology as (
+    select
+        rm.market,
+        rm.cbg_morphology,
+        fm.total_fiber_miles,
+        rm.road_miles as total_road_miles,
+        fm.total_fiber_miles / nullif(rm.road_miles, 0) as fiber_road_ratio
+    from road_miles_by_morphology rm
+    left join fiber_miles_by_market_morphology fm
+        on rm.market = fm.market
+        and rm.cbg_morphology = fm.cbg_morphology
+    -- group by 1,2,3
+),
+
+-- Final pivot for output
+fiber_road_ratios_final as (
+    select
+        market,
+        max(case when cbg_morphology = 'Rural' then fiber_road_ratio end) as rural_fiber_road_ratio,
+        max(case when cbg_morphology = 'Rural' then total_road_miles end) as rural_total_road_miles,
+        max(case when cbg_morphology = 'Rural' then total_fiber_miles end) as rural_total_fiber_miles,
+        max(case when cbg_morphology = 'Suburban' then fiber_road_ratio end) as suburban_fiber_road_ratio,
+        max(case when cbg_morphology = 'Suburban' then total_road_miles end) as suburban_total_road_miles,
+        max(case when cbg_morphology = 'Suburban' then total_fiber_miles end) as suburban_total_fiber_miles,
+        max(case when cbg_morphology = 'Urban' then fiber_road_ratio end) as urban_fiber_road_ratio,
+        max(case when cbg_morphology = 'Urban' then total_road_miles end) as urban_total_road_miles,
+        max(case when cbg_morphology = 'Urban' then total_fiber_miles end) as urban_total_fiber_miles,
+        max(case when cbg_morphology = 'Dense Urban' then fiber_road_ratio end) as dense_urban_fiber_road_ratio,
+        max(case when cbg_morphology = 'Dense Urban' then total_road_miles end) as dense_urban_total_road_miles,
+        max(case when cbg_morphology = 'Dense Urban' then total_fiber_miles end) as dense_urban_total_fiber_miles
+    from fiber_road_ratio_by_morphology
+    group by 1
+),
 -- Language Spoken at Home
 language_speakers_tract_level as (
     select
@@ -464,7 +542,8 @@ precisely_band_counts as(
 select
     ------------ Market Designation(s) ----------------
     base.market, 
-    SPLIT_PART(base.market, ' || ', 1) as provider,
+    SPLIT_PART(base.market, ' || ', 1) as state,
+    SPLIT_PART(base.market, ' || ', 2) as provider,
     morph.pct_rural,
     morph.pct_suburban,
     morph.pct_urban,
@@ -488,6 +567,18 @@ select
     rmm.suburban_road_mile_density,
     rmm.urban_road_mile_density,
     rmm.dense_urban_road_mile_density,
+    frr.rural_total_road_miles,
+    frr.rural_total_fiber_miles,
+    frr.rural_fiber_road_ratio,
+    frr.suburban_total_road_miles,
+    frr.suburban_total_fiber_miles,
+    frr.suburban_fiber_road_ratio,
+    frr.urban_total_road_miles,
+    frr.urban_total_fiber_miles,
+    frr.urban_fiber_road_ratio,
+    frr.dense_urban_total_road_miles,
+    frr.dense_urban_total_fiber_miles,
+    frr.dense_urban_fiber_road_ratio,
     -- SFUs/MDUs
    acs.units_1,
     acs.units_2_4,
@@ -553,6 +644,7 @@ left join acs_metrics acs using(market)
 left join acs_2016_onto_2020 acs16 using(market)
 left join road_mile_density_market rm using(market)
 left join road_mile_density_final_morphology rmm using(market)
+left join fiber_road_ratios_final frr using(market)
 left join language_speakers_market_level lang using(market)
 -- Competition
 left join bdc_high_speed_counts_by_market hs using(market)
