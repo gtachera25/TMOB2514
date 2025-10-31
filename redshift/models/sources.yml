@@ -37,6 +37,8 @@ sources:
         identifier: report_intrepid_cbs_in_expansion
       - name: fiber_miles_by_provider_morphology
         identifier: fiber_miles_by_provider_morphology
+      - name: existing_footprint_cbs_including_zipcode
+        identifier: existing_footprint_cbs_including_zipcode
   - name: report_acs
     schema: report_acs
     tables:
@@ -131,6 +133,12 @@ sources:
         identifier: precisely_full_state_data_20250922
       - name: report_cbs_in_phase_2
         identifier: report_cbs_in_phase_2
+      - name: report_top_counties_comp_vintage_v900_20
+        identifier: report_top_counties_comp_vintage_v900_20
+      - name: report_top_counties_comp_vintage_v100_20
+        identifier: report_top_counties_comp_vintage_v100_20
+      - name: report_top_counties_comp_vintage_v900_20_state
+        identifier: report_top_counties_comp_vintage_v900_20_state
 
 
   

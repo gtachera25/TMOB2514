@@ -573,18 +573,10 @@ select
     'N/A' as precisely_units_2_4_0_500ft,
     'N/A' as precisely_units_5_19_0_500ft,
     'N/A' as precisely_units_20_plus_0_500ft,
-    case 
-        when SPLIT_PART(base.market, ' || ', 4) = 'In Place' then 0
-        else SPLIT_PART(base.market, ' || ', 3)::int
-    end as ami_tag,
-    case 
-        when SPLIT_PART(base.market, ' || ', 4) = 'In Place' then 0
-        else base.county_passings_less_5k_flag
-    end as county_passings_less_5k_flag,
-    case 
-        when SPLIT_PART(base.market, ' || ', 4) = 'In Place' then 0
-        else base.dma_greater_denver_flag
-    end as dma_greater_denver_flag
+
+    SPLIT_PART(base.market, ' || ', 3)::int as ami_tag,
+    base.county_passings_less_5k_flag,
+    base.dma_greater_denver_flag
 
 from market_summary base
 -- Demos

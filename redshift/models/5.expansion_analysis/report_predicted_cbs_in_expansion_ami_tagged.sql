@@ -7,6 +7,7 @@
 select 
     a.census_block_code_2020,
     b.census_county_code,
+    d.market_name, 
     b.county_name,
     a.state,
     case 
